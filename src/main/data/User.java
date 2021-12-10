@@ -9,13 +9,15 @@ public class User
     private String password;
     private int memberId;
     private boolean isAdmin;
+    private String city;
     private Map<Integer, OrderInfo> orders;
 
-    public User(String username, String password, int memberId, boolean isAdmin)
+    public User(String username, String password, String city, int memberId, boolean isAdmin)
     {
         this.username = username;
         this.password = password;
         this.memberId = memberId;
+        this.city = city;
         this.isAdmin = isAdmin;
         this.orders = new HashMap<>();
     }

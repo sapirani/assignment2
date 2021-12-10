@@ -9,6 +9,7 @@ import java.util.Map;
 public class ShowController
 {
     private Map<Integer, ShowInfo> shows;
+    private Map<String, List<Hall>> city_and_hall;
     private int showId_counter;
 
     /**
@@ -30,9 +31,9 @@ public class ShowController
         this.showId_counter = 1;
     }
 
-    public boolean addShow(String show_name, String description, String city, String hall, LocalTime time, boolean clicked_no_time,long show_date, long lastOrderDate, double price)
+    public boolean addShow(User user,String show_name, String description, String city, String hall, LocalTime time, boolean clicked_no_time,long show_date, long lastOrderDate, double price)
     {
-        // TODO: ask where the user checking should be?
+        // TODO: ask where the user checking should be? here, send from the facade the current user.
         if (checkIfShowExists(show_name))
             throw new IllegalArgumentException("Show already exists. Please try again.");
 

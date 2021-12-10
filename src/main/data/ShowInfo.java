@@ -19,7 +19,8 @@ public class ShowInfo {
 	public double ticketCost;
 	public List<OrderInfo> userstoinform = new LinkedList<>();
 
-	public int showId; // TODO: can we add fields here?
+	public List<Integer> remained_regular_sits;
+	public List<Integer> remained_member_sits;
 
 	public ShowInfo() {
 		// TODO: Should add params?
