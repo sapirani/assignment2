@@ -1,5 +1,6 @@
 package main.data;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -37,16 +38,25 @@ public class ShowController
         if(user == null || !user.getIsAdmin())
             throw new IllegalArgumentException("You must be Administrative User in order to add shows to the system.");
 
-        if(user.getCity().equals(city))
-            throw new IllegalArgumentException("The show hall must be in the city you work.1");
-        if(!checkIfCityContainsHall(this.city_and_hall.get(city), hall))
-            throw new IllegalArgumentException("The show hall must be in the city you work.2");
+        if(!user.getCity().equals(city) || !checkIfCityContainsHall(this.city_and_hall.get(city), hall))
+            throw new IllegalArgumentException("The show hall must be in the city you work.");
 
         if(!clicked_no_time && time == null)
             throw new IllegalArgumentException("You must click the botton titled \"The time has not yet been set\"");
 
         if(lastOrderDate > show_date)
             throw new IllegalArgumentException("The last order date must be befor the show starts.");
+        try{
+            long today = new SimpleDateFormat("dd.MM.yyyy").parse(LocalTime.now().toString()).getTime();
+            if(show_date < today)
+                throw new IllegalArgumentException("The show date must be new, after today.");
+        }
+        catch (Exception e)
+        {
+
+        }
+
+
 
         int show_id = showId_counter;
         int number_of_sits = getNumberOfChairsInHall(this.city_and_hall.get(city), hall);
