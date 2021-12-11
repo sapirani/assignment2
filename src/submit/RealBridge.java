@@ -1,10 +1,8 @@
 package submit;
 
 import main.bridge.Bridge;
-import main.data.Facade;
-import main.data.OrderInfo;
-import main.data.Response;
-import main.data.ShowInfo;
+import submit.ShowPackage.OrderInfo;
+import submit.ShowPackage.ShowInfo;
 
 import java.util.List;
 
@@ -36,8 +34,7 @@ public class RealBridge implements Bridge
         boolean has_clicked = showInfo.hastime ? false : true;
         this.facade.login(user, pass);
 
-        Response r = this.facade.addShow(showInfo.name, showInfo.city, showInfo.hall, showInfo.description,
-                showInfo.showDate, showInfo.lastOrderDate, showInfo.ticketCost, showInfo.showTime, has_clicked);
+        Response r = this.facade.addShow(showInfo, has_clicked);
         this.facade.logout();
         if(!r.errorOccurred())
             return (int) r.getValue();
@@ -54,8 +51,7 @@ public class RealBridge implements Bridge
     @Override
     public int newOrder(OrderInfo order)
     {
-        Response r = this.facade.addOrder(order.showId, order.name, order.phone, order.chairsIds, order.memberId);
-        this.facade.logout();
+        Response r = this.facade.addOrder(order);
         if(!r.errorOccurred())
             return (int) r.getValue();
 
@@ -65,6 +61,10 @@ public class RealBridge implements Bridge
     @Override
     public List<OrderInfo> getWaitings(int id)
     {
+        Response r = this.facade.getWaitings(id);
+        if(!r.errorOccurred())
+            return (List<OrderInfo>) r.getValue();
+
         return null;
     }
 }

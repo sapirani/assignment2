@@ -3,8 +3,8 @@ package test.bridge;
 import java.util.LinkedList;
 import java.util.List;
 
-import main.data.OrderInfo;
-import main.data.ShowInfo;
+import submit.ShowPackage.OrderInfo;
+import submit.ShowPackage.ShowInfo;
 import main.bridge.Bridge;
 
 public class ProxyBridge implements Bridge {

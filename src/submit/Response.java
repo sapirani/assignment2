@@ -1,4 +1,4 @@
-package main.data;
+package submit;
 /**
  * @author : Sapir Anidgar and Sagi Brudni
  */

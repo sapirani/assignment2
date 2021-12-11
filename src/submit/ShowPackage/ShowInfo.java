@@ -1,4 +1,4 @@
-package main.data;
+package submit.ShowPackage;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
@@ -27,7 +27,7 @@ public class ShowInfo {
 		showTime = null;
 	}
 
-	public ShowInfo(String name, String city, String hall, String desc, LocalTime show_time, long show_date, long last_date, double ticket_cost, int available_sits)
+	public ShowInfo(String name, String city, String hall, String desc, LocalTime show_time, long show_date, long last_date, double ticket_cost)
 	{
 		this.name = name;
 		this.city = city;
@@ -38,9 +38,6 @@ public class ShowInfo {
 		this.showDate = show_date;
 		this.lastOrderDate = last_date;
 		this.ticketCost = ticket_cost;
-
-		for(int i = 0; i < available_sits; i++)
-			this.remained_regular_sits.add(i+1);
 	}
 
 	@Override
@@ -141,4 +138,9 @@ public class ShowInfo {
 		return true;
 	}
 
+	public void initializeChairs(int number_of_sits)
+	{
+		for(int i = 0; i < number_of_sits; i++)
+			this.remained_regular_sits.add(i+1);
+	}
 }

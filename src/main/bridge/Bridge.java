@@ -2,8 +2,8 @@ package main.bridge;
 
 import java.util.List;
 
-import main.data.OrderInfo;
-import main.data.ShowInfo;
+import submit.ShowPackage.OrderInfo;
+import submit.ShowPackage.ShowInfo;
 
 public interface Bridge {
 

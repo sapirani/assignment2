@@ -7,8 +7,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import main.data.ShowInfo;
-import main.data.OrderInfo;
+import submit.ShowPackage.ShowInfo;
+import submit.ShowPackage.OrderInfo;
 
 public class OrderTest extends ProjectTest {
 

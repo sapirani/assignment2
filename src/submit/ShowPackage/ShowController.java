@@ -1,9 +1,8 @@
-package main.data;
+package submit.ShowPackage;
 
 import javafx.util.Pair;
+import submit.UserPackage.User;
 
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -35,8 +34,15 @@ public class ShowController
         this.orderId_counter = 1;
     }
 
-    public int addShow(User user,String show_name, String description, String city, String hall, LocalTime time, boolean clicked_no_time,long show_date, long lastOrderDate, double price)
+    public int addShow(User user, ShowInfo show, boolean clicked_no_time)
     {
+        String city = show.city;
+        String hall = show.hall;
+        LocalTime time = show.showTime;
+        long show_date = show.showDate;
+        long lastOrderDate = show.lastOrderDate;
+        int show_id = showId_counter;
+
         if(user == null || !user.getIsAdmin())
             throw new IllegalArgumentException("You must be Administrative User in order to add shows to the system.");
 
@@ -48,6 +54,7 @@ public class ShowController
 
         if(lastOrderDate > show_date)
             throw new IllegalArgumentException("The last order date must be befor the show starts.");
+
         try
         {
             long today = System.currentTimeMillis();
@@ -59,10 +66,9 @@ public class ShowController
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        int show_id = showId_counter;
         int number_of_sits = getNumberOfChairsInHall(this.city_and_hall.get(city), hall);
-        ShowInfo new_show = new ShowInfo(show_name, city, hall, description, time, show_date, lastOrderDate, price, number_of_sits);
-        this.shows.put(show_id, new_show);
+        show.initializeChairs(number_of_sits);
+        this.shows.put(show_id, show);
         showId_counter++;
         return show_id;
     }
@@ -114,16 +120,31 @@ public class ShowController
         return new Pair<List<Integer>, List<Integer>>(currentShow.remained_regular_sits, currentShow.remained_member_sits);
     }
 
-    public int addOrder(User currentUser, int show_id, String name, String phone_number, int[] chairs, int memberId)
+    public int addOrder(User currentUser, OrderInfo order)
     {
+        int show_id = order.showId;
+        int memberId = order.memberId;
+        String name = order.name;
+        String phone_number = order.phone;
+        int[] chairs = order.chairsIds;
+
         if(name == null || phone_number == null || phone_number == "" || chairs == null || chairs.length == 0)
             throw new IllegalArgumentException("Order must include name,phone number and chairs!");
 
-        String order_name = name;
         if(currentUser != null && !name.equals(""))
             throw new IllegalArgumentException("You are logged in so your name is known.");
-        else if(currentUser != null && name.equals(""))
-            order_name = currentUser.getUsername();
+        else if(currentUser != null)
+        {
+            if(name.equals(""))
+            {
+                name = currentUser.getUsername();
+                order.name = name;
+            }
+            memberId = currentUser.getMemberId();
+            order.memberId = memberId;
+        }
+        else if(memberId != -1 && memberId <= 0)
+            throw new IllegalArgumentException("The given number does'nt match Pais member.");
 
         ShowInfo currentShow = this.shows.get(show_id);
         if(currentShow == null)
@@ -140,28 +161,19 @@ public class ShowController
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        int member_id = -1;
-        if(currentUser == null && memberId > 0)
-            member_id = memberId;
-        else if(currentUser != null)
-            member_id = currentUser.getMemberId();
-        else if(memberId != -1)
-            throw new IllegalArgumentException("The given number does'nt match Pais member.");
-
-        if(currentShow.checkIfContainsMemberChairs(chairs) && member_id == -1)
+        if(currentShow.checkIfContainsMemberChairs(chairs) && memberId < 0)
             throw new IllegalArgumentException("You are not a Pais member. If you are Pais member, please login first. ");
 
         currentShow.orderChairs(chairs);
-        OrderInfo new_order = new OrderInfo(show_id, order_name, phone_number, chairs, member_id);
         int order_id = orderId_counter;
         boolean flag = true;
         if(!currentShow.hastime)
         {
-           flag = currentShow.addUserToInform(new_order); // if flag = false then the user has 2 orders for the same show, we combine them.
+            flag = currentShow.addUserToInform(order); // if flag = false then the user has 2 orders for the same show, we combine them.
         }
 
-        if(flag)
-            currentUser.addOrder(order_id, new_order);
+        if(flag && currentUser != null)
+            currentUser.addOrder(order_id, order);
         orderId_counter++;
         return order_id;
     }

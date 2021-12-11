@@ -8,7 +8,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.time.LocalTime;
 
-import main.data.ShowInfo;
+import submit.ShowPackage.ShowInfo;
 
 public class AddShowTest extends ProjectTest {
 

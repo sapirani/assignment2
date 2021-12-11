@@ -9,8 +9,8 @@ import java.util.List;
 
 import test.bridge.Driver;
 import main.bridge.Bridge;
-import main.data.OrderInfo;
-import main.data.ShowInfo;
+import submit.ShowPackage.OrderInfo;
+import submit.ShowPackage.ShowInfo;
 
 public abstract class ProjectTest {
 	private Bridge bridge;

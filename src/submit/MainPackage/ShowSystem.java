@@ -1,6 +1,10 @@
-package main.data;
+package submit.MainPackage;
 
 import javafx.util.Pair;
+import submit.Facade;
+import submit.Response;
+import submit.ShowPackage.OrderInfo;
+import submit.ShowPackage.ShowInfo;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
@@ -233,7 +237,8 @@ public class ShowSystem
             time = getValidTime("Insert the show time: ", "The time format should be hh:mm:ss");
         }
 
-        Response response = facade.addShow(show_name, city, hall, desc, show_date, last_order_date, ticket_price, time, time_operation.getValue());
+        ShowInfo show = new ShowInfo(show_name, city, hall,  desc, time, show_date, last_order_date, ticket_price);
+        Response response = facade.addShow(show, time_operation.getValue());
         if(response.errorOccurred())
             System.out.println("Failed to add new show to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -274,7 +279,8 @@ public class ShowSystem
         int[] chairs = getAllChairs();
         int memberId = getIntegerInputFromUser("Insert Pais member id (if you logged in already/don't have one, enter -1): ", "Member id must be positive integer.");
 
-        Response response = this.facade.addOrder(show_id, name, phone_number, chairs, memberId);
+        OrderInfo order = new OrderInfo(show_id, name, phone_number, chairs, memberId);
+        Response response = this.facade.addOrder(order);
         if(response.errorOccurred())
             System.out.println("Failed to order chairs to the show. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else

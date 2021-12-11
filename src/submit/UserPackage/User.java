@@ -1,9 +1,8 @@
-package main.data;
+package submit.UserPackage;
 
-import java.awt.*;
+import submit.ShowPackage.OrderInfo;
+
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 public class User
@@ -13,7 +12,7 @@ public class User
     private int memberId;
     private boolean isAdmin;
     private String city;
-    public Map<Integer,OrderInfo> orders = new HashMap<>();
+    public Map<Integer, OrderInfo> orders = new HashMap<>();
 
     public User(String username, String password, String city, int memberId, boolean isAdmin)
     {

@@ -1,8 +1,12 @@
-package main.data;
+package submit;
 
 import javafx.util.Pair;
+import submit.ShowPackage.OrderInfo;
+import submit.ShowPackage.ShowController;
+import submit.ShowPackage.ShowInfo;
+import submit.UserPackage.User;
+import submit.UserPackage.UserController;
 
-import java.time.LocalTime;
 import java.util.List;
 
 public class Facade
@@ -58,7 +62,7 @@ public class Facade
         }
         catch (Exception e)
         {
-            return new Response(e.getMessage()); // TODO: what value should return? need Respone object?
+            return new Response(e.getMessage());
         }
     }
 
@@ -86,13 +90,12 @@ public class Facade
         }
     }
 
-    public Response addShow(String show_name, String city, String hall, String description,
-                            long showDate, long last_date, double ticket_price, LocalTime show_time, boolean hasClicked)
+    public Response addShow(ShowInfo show, boolean hasClicked)
     {
         try
         {
             User current_user = this.user_controller.getLogedInUser();
-            int show_id = this.show_controller.addShow(current_user, show_name, description, city, hall, show_time, hasClicked, showDate, last_date, ticket_price);
+            int show_id = this.show_controller.addShow(current_user, show, hasClicked);
             return new Response(show_id);
         }
         catch (Exception e)
@@ -126,12 +129,12 @@ public class Facade
         }
     }
 
-    public Response addOrder(int show_id, String name, String phone_number, int[] chairs, int memberId)
+    public Response addOrder(OrderInfo order)
     {
         try
         {
             User currentUser = this.user_controller.getLogedInUser();
-            return new Response(this.show_controller.addOrder(currentUser, show_id, name, phone_number, chairs, memberId));
+            return new Response(this.show_controller.addOrder(currentUser, order));
         }
         catch (Exception e)
         {
