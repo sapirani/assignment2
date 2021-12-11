@@ -43,6 +43,7 @@ public class ShowController
         long lastOrderDate = show.lastOrderDate;
         int show_id = showId_counter;
 
+        /* validation of input */
         if(user == null || !user.getIsAdmin())
             throw new IllegalArgumentException("You must be Administrative User in order to add shows to the system.");
 
@@ -67,7 +68,7 @@ public class ShowController
         }
 
         int number_of_sits = getNumberOfChairsInHall(this.city_and_hall.get(city), hall);
-        show.initializeChairs(number_of_sits);
+        show.initializeChairs(number_of_sits); // Initialize number of available sits in the show's hall
         this.shows.put(show_id, show);
         showId_counter++;
         return show_id;
@@ -100,17 +101,21 @@ public class ShowController
             throw new IllegalArgumentException("This show does'nt exist in the system.");
 
         ShowInfo current_show = this.shows.get(show_id);
+        // check if the requested sits (from, to) are available
         if(!current_show.remained_regular_sits.contains(sit_from) || !current_show.remained_regular_sits.contains(sit_to))
             throw new IllegalArgumentException("The indexes aren't available.");
 
+        // check if there are enough available sits between from and to
         if(current_show.checkIfThereAreEnoughChairs(sit_from, sit_to))
         {
             current_show.reserveMemberChairs(sit_from,sit_to);
         }
-
         return true;
     }
 
+    /*
+     * See which sits are available in the selected show.
+     */
     public Pair<List<Integer>, List<Integer>> getAvailableChairsInShow(int show_id)
     {
         ShowInfo currentShow = this.shows.get(show_id);
@@ -128,6 +133,7 @@ public class ShowController
         String phone_number = order.phone;
         int[] chairs = order.chairsIds;
 
+        /* input validation */
         if(name == null || phone_number == null || phone_number == "" || chairs == null || chairs.length == 0)
             throw new IllegalArgumentException("Order must include name,phone number and chairs!");
 
@@ -161,6 +167,7 @@ public class ShowController
             throw new IllegalArgumentException(e.getMessage());
         }
 
+        // if you tried to order reserve chairs but you are not pais member
         if(currentShow.checkIfContainsMemberChairs(chairs) && memberId < 0)
             throw new IllegalArgumentException("You are not a Pais member. If you are Pais member, please login first. ");
 
@@ -173,7 +180,7 @@ public class ShowController
         }
 
         if(flag && currentUser != null)
-            currentUser.addOrder(order_id, order);
+            currentUser.addOrder(order_id, order); // add the order to the user.
         orderId_counter++;
         return order_id;
     }
@@ -187,6 +194,9 @@ public class ShowController
         return currentShow.userstoinform; // TODO: what need to return?
     }
 
+    /*
+     * Helpful function to get the number of chairs in specific hall
+     */
     private int getNumberOfChairsInHall(List<Hall> halls, String hall)
     {
         for (Hall hall_object: halls)
@@ -197,6 +207,9 @@ public class ShowController
         return 0;
     }
 
+    /*
+     * Helpful function to check if the current hall already exists.
+     */
     private boolean checkIfCityContainsHall(List<Hall> halls, String hall)
     {
         for (Hall hall_object: halls)

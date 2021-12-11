@@ -27,11 +27,11 @@ public class Facade
         return Facade.FacadeHolder.INSTANCE;
     }
 
-    public Response signIn(String new_username, String password, String city,int memberId, boolean isAdmin)
+    public Response signUp(String new_username, String password, String city, int memberId, boolean isAdmin)
     {
         try
         {
-            this.user_controller.signIn(new_username, password, city, memberId, isAdmin);
+            this.user_controller.signUp(new_username, password, city, memberId, isAdmin);
             return new Response(true);
         }
         catch (Exception e)

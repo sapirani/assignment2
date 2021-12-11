@@ -54,14 +54,17 @@ public class ShowInfo {
 		return format.format(date);
 	}
 
+	/*
+	 * Check if there are enough free chairs.
+	 */
 	public boolean checkIfThereAreEnoughChairs(int sit_from, int sit_to)
 	{
-		int startIndex = this.remained_regular_sits.indexOf(sit_from);
-		int endIndex = this.remained_regular_sits.indexOf(sit_to);
-
-		if((endIndex - startIndex) == (sit_to - sit_from))
-			return true;
-		return false;
+		for (int i = sit_from; i <= sit_to; i++)
+		{
+			if(!this.remained_regular_sits.contains(i))
+				return false;
+		}
+		return true;
 	}
 
 	public void reserveMemberChairs(int sit_from, int sit_to)
@@ -70,11 +73,13 @@ public class ShowInfo {
 		int endIndex = this.remained_regular_sits.indexOf(sit_to);
 		List<Integer> new_list_of_chairs = new LinkedList<>();
 
+		// add the sits to the members sits
 		for(int i = startIndex; i <= endIndex; i++)
 		{
 			this.remained_member_sits.add(remained_regular_sits.get(i));
 		}
 
+		// update the number of regular chairs
 		for(int i = 0, j = 0; i < this.remained_regular_sits.size(); i++)
 		{
 			if(i < startIndex || i > endIndex)
@@ -83,11 +88,9 @@ public class ShowInfo {
 		this.remained_regular_sits = new_list_of_chairs;
 	}
 
-	/*public boolean isAvailableChair(int chair)
-	{
-		return (this.remained_regular_sits.contains(chair) || this.remained_member_sits.contains(chair));
-	}*/
-
+	/*
+	 * Delete the chosen chairs from the available chairs.
+	 */
 	public boolean orderChairs(int[] chairs)
 	{
 		for (Integer chair: chairs)
@@ -102,6 +105,9 @@ public class ShowInfo {
 		return true;
 	}
 
+	/*
+	 * Checks if the asked chairs include reserved chairs.
+	 */
 	public boolean checkIfContainsMemberChairs(int[] chairs)
 	{
 		for (Integer chair: chairs)
@@ -112,6 +118,9 @@ public class ShowInfo {
 		return false;
 	}
 
+	/*
+	 * If the show does'nt have time, add the order of the person you need to update.
+	 */
 	public boolean addUserToInform(OrderInfo newOrder)
 	{
 		boolean flag = false;
@@ -138,6 +147,9 @@ public class ShowInfo {
 		return true;
 	}
 
+	/*
+	 * Initialize the available regular chairs.
+	 */
 	public void initializeChairs(int number_of_sits)
 	{
 		for(int i = 0; i < number_of_sits; i++)

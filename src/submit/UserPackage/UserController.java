@@ -27,7 +27,7 @@ public class UserController
         this.loged_in_user = null;
     }
 
-    public boolean signIn(String new_username, String password, String city,int memberId, boolean isAdmin)
+    public boolean signUp(String new_username, String password, String city, int memberId, boolean isAdmin)
     {
         if(checkIfUsernameExists(new_username))
             throw new IllegalArgumentException("Username already taken. Pleas try again.\n");
@@ -39,6 +39,7 @@ public class UserController
 
     public boolean login(String username, String password)
     {
+        // can login only if no one is logged in yet, and only if you signed up first
         User current = this.users.get(username);
         if(current == null)
             throw new IllegalArgumentException("Username doesn't exists in the system. Please try again.\n");
@@ -46,7 +47,7 @@ public class UserController
             throw new IllegalArgumentException("There is another user who is logged in. Please try again later\n.");
         else if(current.getPassword().equals(password))
         {
-            this.loged_in_user = current;
+            this.loged_in_user = current; // change the current user in the system
             return true;
         }
         throw new IllegalArgumentException("Password does'nt match the username. Please try again.\n");

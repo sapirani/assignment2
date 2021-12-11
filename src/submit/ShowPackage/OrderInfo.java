@@ -29,6 +29,9 @@ public class OrderInfo {
 				+ Arrays.toString(chairsIds) + ", memberId=" + memberId + "]";
 	}
 
+	/*
+	 * If the same user order twice to the same show, combine the two orders.
+	 */
 	public void addChairs(int[] chairsIds)
 	{
 		int[] new_chairs = new int[this.chairsIds.length + chairsIds.length];

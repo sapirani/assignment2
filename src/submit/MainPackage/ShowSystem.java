@@ -21,6 +21,7 @@ public class ShowSystem
 
     private final Scanner scanner;
 
+    /* Functions for the menu */
     public ShowSystem()
     {
         this.scanner = new Scanner(System.in);
@@ -31,8 +32,8 @@ public class ShowSystem
 
     private void manageMainMenu()
     {
-        this.main_menu_instructions.add("Sign in as administrative user");
-        this.main_menu_instructions.add("Sign in as Pais member only");
+        this.main_menu_instructions.add("Sign up as administrative user");
+        this.main_menu_instructions.add("Sign up as Pais member only");
         this.main_menu_instructions.add("Login");
         this.main_menu_instructions.add("Logout");
         this.main_menu_instructions.add("Add city to the system");
@@ -43,8 +44,8 @@ public class ShowSystem
         this.main_menu_instructions.add("See all waiting for show");
         this.main_menu_instructions.add("Exit");
 
-        this.main_menu_handler.add(this::signInAsAdministrativeUser);
-        this.main_menu_handler.add(this::signInAsPaisMemberUser);
+        this.main_menu_handler.add(this::signUpAsAdministrativeUser);
+        this.main_menu_handler.add(this::signUpAsPaisMemberUser);
         this.main_menu_handler.add(this::login);
         this.main_menu_handler.add(this::logout);
         this.main_menu_handler.add(this::addCity);
@@ -56,9 +57,8 @@ public class ShowSystem
         this.main_menu_handler.add(this::quit);
     }
 
-    /**
-     * Generic function for handling menu.
-     * Displays the menu instructions, gets the chosen option, and run the right function
+    /*
+     * Display the menu over and over, until exit option is chosen.
      */
     public void runMenu()
     {
@@ -122,7 +122,13 @@ public class ShowSystem
         return "\nChoose option from the displayed menu!\n";
     }
 
-    public void signInAsAdministrativeUser()
+    /* Operation Functions */
+
+    /**
+     * Sign In to the system as admin user.
+     * Can be a pais member too.
+     */
+    public void signUpAsAdministrativeUser()
     {
         System.out.println("Insert Username: ");
         String username = scanner.nextLine();
@@ -135,14 +141,17 @@ public class ShowSystem
 
         int memberId = getIntegerInputFromUser("Insert your Pais member id (if you don't have one, enter -1): ", "Member id must be integer.");
 
-        Response response = facade.signIn(username, password, city, memberId, true);
+        Response response = facade.signUp(username, password, city, memberId, true);
         if(response.errorOccurred())
             System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
             System.out.println("Signed up successfully to the system.\n");
     }
 
-    public void signInAsPaisMemberUser()
+    /**
+     * Sign In to the system as Pais member user.
+     */
+    public void signUpAsPaisMemberUser()
     {
         System.out.println("Insert Username: ");
         String username = scanner.nextLine();
@@ -155,13 +164,16 @@ public class ShowSystem
 
         int memberId = getIntegerInputFromUser("Insert your Pais member id: ", "Member id must be integer.");
 
-        Response response = facade.signIn(username, password, city, memberId, false);
+        Response response = facade.signUp(username, password, city, memberId, false);
         if(response.errorOccurred())
             System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
             System.out.println("Signed up successfully to the system.\n");
     }
 
+    /*
+     * Log in to the system (in order to add new show)
+     */
     public void login()
     {
         System.out.println("Insert Username: ");
@@ -177,6 +189,9 @@ public class ShowSystem
             System.out.println("Logged in successfully to the system. \n");
     }
 
+    /*
+     * Log out from the system (in order to change user)
+     */
     public void logout()
     {
         Response response = facade.logout();
@@ -186,6 +201,9 @@ public class ShowSystem
             System.out.println("Logged out successfully from the system. \n");
     }
 
+    /*
+     * Add city to the system (in order to add halls)
+     */
     public void addCity()
     {
         System.out.println("Insert City name: ");
@@ -199,6 +217,9 @@ public class ShowSystem
 
     }
 
+    /*
+     * Add hall to the system (in order to add shows)
+     */
     public void addHall()
     {
         System.out.println("Insert City name of hall: ");
@@ -216,6 +237,11 @@ public class ShowSystem
             System.out.println("The new hall added to the system.\n");
     }
 
+    /*
+     * Add show to the system.
+     * allowed only if: you're admin, you work in the chosen city, valid inputs.
+     * If the show does'nt have time yet. you must clicke the matching botton.
+     */
     public void addShow()
     {
         System.out.println("Insert Show name: ");
@@ -245,6 +271,9 @@ public class ShowSystem
             System.out.println("The new show added to the system. The show ID is: " + response.getValue() +"\n");
     }
 
+    /*
+     * Reserve chairs for pais members.
+     */
     public void reserveMemberChairs()
     {
         int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
@@ -258,12 +287,19 @@ public class ShowSystem
             System.out.println("Reserved the chairs successfully. \n");
     }
 
+    /*
+     * Add Order of chairs.
+     * allowed only if: if the chosen chair is reserved one, you must be pais member, valid inputs.
+     */
     public void orderSits()
     {
         int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
         Response all_available_chairs = this.facade.getAvailableChairsInShow(show_id);
         if(all_available_chairs.errorOccurred())
+        {
             System.out.println("Failed to get the available chairs in the show. \n" + all_available_chairs.getErrorMessage() + "\nPlease try again.\n");
+            return;
+        }
         else
         {
             System.out.println("The available chairs are: ");
@@ -288,6 +324,9 @@ public class ShowSystem
 
     }
 
+    /*
+     * Private helpful functions that gets the chairs as input from the user, and turns it to array of integers.
+     */
     private int[] getAllChairs()
     {
         String[] chairs_as_string = scanner.nextLine().split(" ");
@@ -310,23 +349,45 @@ public class ShowSystem
         return chairs;
     }
 
+    /*
+     * Get all the names of the people who wait for an update
+     */
     public void checkShowWaitings()
     {
         int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
-        Response waiting_order_ids = this.facade.getWaitings(show_id);
-        if(waiting_order_ids.errorOccurred())
-            System.out.println("Failed to get the waiting orders for the show. \n" + waiting_order_ids.getErrorMessage() + "\nPlease try again.\n");
+        Response waiting_order = this.facade.getWaitings(show_id);
+        if(waiting_order.errorOccurred())
+            System.out.println("Failed to get the waiting orders for the show. \n" + waiting_order.getErrorMessage() + "\nPlease try again.\n");
         else
-            System.out.println("The waiting orders id's: " + waiting_order_ids.getValue().toString());
+            System.out.println("The waiting orders names: " + printWaitingOrders((List<OrderInfo>)waiting_order.getValue()));
     }
 
-    // TODO: add update of show time?
+    /*
+     * Helpful function that takes all the names from the orders.
+     */
+    private String printWaitingOrders(List<OrderInfo> value)
+    {
+        String names = "";
+        int i = 0;
+        for(i = 0; i < value.size() - 1; i++)
+        {
+            names += value.get(i).name + " , ";
+        }
+        names += value.get(i).name;
+        return names;
+    }
 
+    /*
+     * Exit the system.
+     */
     public void quit()
     {
         System.out.println("Good bye :)\n");
     }
 
+    /*
+     * Helpful function that handles the time input, according to the user's wish (the show is with or without time)
+     */
     private Pair<Boolean,Boolean> handleTimeOfShow()
     {
         System.out.println("The show has time? y or n");
@@ -343,6 +404,8 @@ public class ShowSystem
         }
         return new Pair<>(hasTime, botton_clicked);
     }
+
+    /* Helpful functions that chack validation of inputs */
 
     private int getIntegerInputFromUser(String message, String error_message)
     {
@@ -400,8 +463,8 @@ public class ShowSystem
         return time;
     }
 
-    private long getValidDate(String message_for_user, String error_message_for_user) {
-
+    private long getValidDate(String message_for_user, String error_message_for_user)
+    {
         long date = -1;
         SimpleDateFormat date_format = new SimpleDateFormat("dd.MM.yyyy");
         date_format.setLenient(false);

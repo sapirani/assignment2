@@ -25,14 +25,14 @@ public class RealBridge implements Bridge
     @Override
     public void addAdmin(String city, String user, String pass)
     {
-        this.facade.signIn(user, pass, city, -1, true);
+        this.facade.signUp(user, pass, city, -1, true);
     }
 
     @Override
     public int addNewShow(String user, String pass, ShowInfo showInfo)
     {
-        boolean has_clicked = showInfo.hastime ? false : true;
-        this.facade.login(user, pass);
+        boolean has_clicked = showInfo.hastime ? false : true; // If the show doesn't have time, you must click the matching bottom.
+        this.facade.login(user, pass); // You must login as admin user
 
         Response r = this.facade.addShow(showInfo, has_clicked);
         this.facade.logout();
