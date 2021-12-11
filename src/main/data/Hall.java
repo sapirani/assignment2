@@ -2,8 +2,8 @@ package main.data;
 
 public class Hall
 {
-    private String hall_name;
-    private int number_of_chairs;
+    private final String hall_name;
+    private final int number_of_chairs;
 
     public Hall(String name, int number_of_chairs)
     {

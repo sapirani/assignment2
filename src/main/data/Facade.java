@@ -7,15 +7,15 @@ import java.util.List;
 
 public class Facade
 {
-    private UserController user_controller = UserController.getInstance();
-    private ShowController show_controller = ShowController.getInstance();
+    private final UserController user_controller = UserController.getInstance();
+    private final ShowController show_controller = ShowController.getInstance();
 
     /**
      * Implementation of singleton
      */
     private static class FacadeHolder
     {
-        private static Facade INSTANCE = new Facade();
+        private static final Facade INSTANCE = new Facade();
     }
 
     public static Facade getInstance()
@@ -126,12 +126,24 @@ public class Facade
         }
     }
 
-    public Response addOrder(int show_id, String name, String phone_number, int[] chairs)
+    public Response addOrder(int show_id, String name, String phone_number, int[] chairs, int memberId)
     {
         try
         {
             User currentUser = this.user_controller.getLogedInUser();
-            return new Response(this.show_controller.addOrder(currentUser, show_id, name, phone_number, chairs));
+            return new Response(this.show_controller.addOrder(currentUser, show_id, name, phone_number, chairs, memberId));
+        }
+        catch (Exception e)
+        {
+            return new Response(e.getMessage());
+        }
+    }
+
+    public Response getWaitings(int show_id)
+    {
+        try
+        {
+            return new Response(this.show_controller.getWaitings(show_id));
         }
         catch (Exception e)
         {

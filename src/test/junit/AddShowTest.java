@@ -30,7 +30,8 @@ public class AddShowTest extends ProjectTest {
 	}
 
 	@Test
-	public void testAddShow() {
+	public void testAddShow()
+	{
 		int showId0, showId1;
 
 		showId0 = this.addNewShow(this.users[0][USER_USER], this.users[0][USER_PASS], this.goodShow0);

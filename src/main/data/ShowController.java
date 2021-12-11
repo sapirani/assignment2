@@ -114,13 +114,16 @@ public class ShowController
         return new Pair<List<Integer>, List<Integer>>(currentShow.remained_regular_sits, currentShow.remained_member_sits);
     }
 
-    public int addOrder(User currentUser, int show_id, String name, String phone_number, int[] chairs)
+    public int addOrder(User currentUser, int show_id, String name, String phone_number, int[] chairs, int memberId)
     {
-        String order_name = currentUser.getUsername();
+        if(name == null || phone_number == null || phone_number == "" || chairs == null || chairs.length == 0)
+            throw new IllegalArgumentException("Order must include name,phone number and chairs!");
+
+        String order_name = name;
         if(currentUser != null && !name.equals(""))
-            throw new IllegalArgumentException("You are loged in so your name is known.");
-        else if(currentUser == null && !name.equals(""))
-            order_name = name;
+            throw new IllegalArgumentException("You are logged in so your name is known.");
+        else if(currentUser != null && name.equals(""))
+            order_name = currentUser.getUsername();
 
         ShowInfo currentShow = this.shows.get(show_id);
         if(currentShow == null)
@@ -137,11 +140,19 @@ public class ShowController
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        if(currentShow.checkIfContainsMemberChairs(chairs) && currentUser.getMemberId() == -1)
+        int member_id = -1;
+        if(currentUser == null && memberId > 0)
+            member_id = memberId;
+        else if(currentUser != null)
+            member_id = currentUser.getMemberId();
+        else if(memberId != -1)
+            throw new IllegalArgumentException("The given number does'nt match Pais member.");
+
+        if(currentShow.checkIfContainsMemberChairs(chairs) && member_id == -1)
             throw new IllegalArgumentException("You are not a Pais member. If you are Pais member, please login first. ");
 
         currentShow.orderChairs(chairs);
-        OrderInfo new_order = new OrderInfo(show_id, order_name, phone_number, chairs, currentUser.getMemberId());
+        OrderInfo new_order = new OrderInfo(show_id, order_name, phone_number, chairs, member_id);
         int order_id = orderId_counter;
         boolean flag = true;
         if(!currentShow.hastime)
@@ -153,6 +164,15 @@ public class ShowController
             currentUser.addOrder(order_id, new_order);
         orderId_counter++;
         return order_id;
+    }
+
+    public List<OrderInfo> getWaitings(int show_id)
+    {
+        ShowInfo currentShow = this.shows.get(show_id);
+        if(currentShow == null)
+            throw new IllegalArgumentException("This show does'nt exist in the system.");
+
+        return currentShow.userstoinform; // TODO: what need to return?
     }
 
     private int getNumberOfChairsInHall(List<Hall> halls, String hall)

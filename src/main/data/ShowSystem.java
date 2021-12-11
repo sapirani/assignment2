@@ -36,6 +36,7 @@ public class ShowSystem
         this.main_menu_instructions.add("Add Show");
         this.main_menu_instructions.add("Reserve Member Chairs");
         this.main_menu_instructions.add("Order sits");
+        this.main_menu_instructions.add("See all waiting for show");
         this.main_menu_instructions.add("Exit");
 
         this.main_menu_handler.add(this::signInAsAdministrativeUser);
@@ -47,6 +48,7 @@ public class ShowSystem
         this.main_menu_handler.add(this::addShow);
         this.main_menu_handler.add(this::reserveMemberChairs);
         this.main_menu_handler.add(this::orderSits);
+        this.main_menu_handler.add(this::checkShowWaitings);
         this.main_menu_handler.add(this::quit);
     }
 
@@ -256,7 +258,7 @@ public class ShowSystem
         int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
         Response all_available_chairs = this.facade.getAvailableChairsInShow(show_id);
         if(all_available_chairs.errorOccurred())
-            System.out.println("Failed to get the available chairs in the show.. \n" + all_available_chairs.getErrorMessage() + "\nPlease try again.\n");
+            System.out.println("Failed to get the available chairs in the show. \n" + all_available_chairs.getErrorMessage() + "\nPlease try again.\n");
         else
         {
             System.out.println("The available chairs are: ");
@@ -270,12 +272,13 @@ public class ShowSystem
         String phone_number = scanner.nextLine();
         System.out.println("Insert all the sits you want to order: ");
         int[] chairs = getAllChairs();
+        int memberId = getIntegerInputFromUser("Insert Pais member id (if you logged in already/don't have one, enter -1): ", "Member id must be positive integer.");
 
-        Response response = this.facade.addOrder(show_id, name, phone_number, chairs);
+        Response response = this.facade.addOrder(show_id, name, phone_number, chairs, memberId);
         if(response.errorOccurred())
             System.out.println("Failed to order chairs to the show. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
-            System.out.println("The order of chairs added successfully. The chairs are saved for you for one hour. Please call and pay. \n");
+            System.out.println("The order of chairs added successfully. The chairs are saved for you for one hour. Please call and pay. \nThe order id: " + response.getValue() + "\n");
 
     }
 
@@ -300,6 +303,18 @@ public class ShowSystem
         }
         return chairs;
     }
+
+    public void checkShowWaitings()
+    {
+        int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
+        Response waiting_order_ids = this.facade.getWaitings(show_id);
+        if(waiting_order_ids.errorOccurred())
+            System.out.println("Failed to get the waiting orders for the show. \n" + waiting_order_ids.getErrorMessage() + "\nPlease try again.\n");
+        else
+            System.out.println("The waiting orders id's: " + waiting_order_ids.getValue().toString());
+    }
+
+    // TODO: add update of show time?
 
     public void quit()
     {
