@@ -46,4 +46,9 @@ public class User
     {
         return this.orders;
     }
+
+    public String getCity()
+    {
+        return this.city;
+    }
 }

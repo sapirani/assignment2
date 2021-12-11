@@ -19,12 +19,28 @@ public class ShowInfo {
 	public double ticketCost;
 	public List<OrderInfo> userstoinform = new LinkedList<>();
 
-	public List<Integer> remained_regular_sits;
-	public List<Integer> remained_member_sits;
+	public List<Integer> remained_regular_sits = new LinkedList<>();
+	public List<Integer> remained_member_sits = new LinkedList<>();
 
-	public ShowInfo() {
-		// TODO: Should add params?
+	public ShowInfo()
+	{
 		showTime = null;
+	}
+
+	public ShowInfo(String name, String city, String hall, String desc, LocalTime show_time, long show_date, long last_date, double ticket_cost, int available_sits)
+	{
+		this.name = name;
+		this.city = city;
+		this.hall = hall;
+		this.description = desc;
+		this.hastime = (showTime == null) ? false : true;
+		this.showTime = show_time;
+		this.showDate = show_date;
+		this.lastOrderDate = last_date;
+		this.ticketCost = ticket_cost;
+
+		for(int i = 0; i < available_sits; i++)
+			this.remained_regular_sits.add(i+1);
 	}
 
 	@Override

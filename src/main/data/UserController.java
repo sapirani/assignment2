@@ -61,6 +61,10 @@ public class UserController
         return true;
     }
 
+    public User getLogedInUser()
+    {
+        return this.loged_in_user;
+    }
 
     private boolean checkIfUsernameExists(String username)
     {

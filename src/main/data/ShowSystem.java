@@ -1,5 +1,9 @@
 package main.data;
 
+import javafx.util.Pair;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalTime;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -27,6 +31,8 @@ public class ShowSystem
         this.main_menu_instructions.add("Sign in as Pais member only");
         this.main_menu_instructions.add("Login");
         this.main_menu_instructions.add("Logout");
+        this.main_menu_instructions.add("Add city to the system");
+        this.main_menu_instructions.add("Add hall to the system");
         this.main_menu_instructions.add("Add Show");
         this.main_menu_instructions.add("Order sits");
         this.main_menu_instructions.add("Exit");
@@ -35,6 +41,8 @@ public class ShowSystem
         this.main_menu_handler.add(this::signInAsPaisMemberUser);
         this.main_menu_handler.add(this::login);
         this.main_menu_handler.add(this::logout);
+        this.main_menu_handler.add(this::addCity);
+        this.main_menu_handler.add(this::addHall);
         this.main_menu_handler.add(this::addShow);
         this.main_menu_handler.add(this::orderSits);
         this.main_menu_handler.add(this::quit);
@@ -121,9 +129,9 @@ public class ShowSystem
 
         Response response = facade.signIn(username, password, city, memberId, true);
         if(response.errorOccurred())
-            System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.");
+            System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
-            System.out.println("Signed up successfully to the system.");
+            System.out.println("Signed up successfully to the system.\n");
     }
 
     public void signInAsPaisMemberUser()
@@ -141,9 +149,9 @@ public class ShowSystem
 
         Response response = facade.signIn(username, password, city, memberId, false);
         if(response.errorOccurred())
-            System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.");
+            System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
-            System.out.println("Signed up successfully to the system.");
+            System.out.println("Signed up successfully to the system.\n");
     }
 
     public void login()
@@ -156,9 +164,9 @@ public class ShowSystem
 
         Response response = facade.login(username, password);
         if(response.errorOccurred())
-            System.out.println("Login failed. \n" + response.getErrorMessage() + "\nPlease try again.");
+            System.out.println("Login failed. \n" + response.getErrorMessage() + "\n");
         else
-            System.out.println("Logged in successfully to the system.");
+            System.out.println("Logged in successfully to the system. \n");
     }
 
     public void logout()
@@ -167,12 +175,65 @@ public class ShowSystem
         if(response.errorOccurred())
             System.out.println("Logout failed. \n" + response.getErrorMessage());
         else
-            System.out.println("Logged out successfully from the system.");
+            System.out.println("Logged out successfully from the system. \n");
+    }
+
+    public void addCity()
+    {
+        System.out.println("Insert City name: ");
+        String city = scanner.nextLine();
+
+        Response response = this.facade.addCity(city);
+        if(response.errorOccurred())
+            System.out.println("Failed to add new city to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
+        else
+            System.out.println("The new city added to the system.\n");
+
+    }
+
+    public void addHall()
+    {
+        System.out.println("Insert City name of hall: ");
+        String city = scanner.nextLine();
+
+        System.out.println("Insert the hall name: ");
+        String hall = scanner.nextLine();
+
+        int number_of_sits = getIntegerInputFromUser("Insert number of available sits in the hall: ", "Number of int must be integer.");
+
+        Response response = this.facade.addHall(city, hall, number_of_sits);
+        if(response.errorOccurred())
+            System.out.println("Failed to add new hall to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
+        else
+            System.out.println("The new hall added to the system.\n");
     }
 
     public void addShow()
     {
+        System.out.println("Insert Show name: ");
+        String show_name = scanner.nextLine();
+        System.out.println("Insert City: ");
+        String city = scanner.nextLine();
+        System.out.println("Insert Hall: ");
+        String hall = scanner.nextLine();
+        System.out.println("Insert description: ");
+        String desc = scanner.nextLine();
+        long show_date = getValidDate("Insert show date: ", "The show date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
+        long last_order_date = getValidDate("Insert last order date: ", "The last order date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
+        double ticket_price = getDoubleInputFromUser("Instert ticket price: ", "Price must be positive number.");
 
+        Pair<Boolean, Boolean> time_operation = handleTimeOfShow();
+        LocalTime time = null;
+        if(time_operation.getKey())
+        {
+            time = getValidTime("Insert the show time: ", "The time format should be hh:mm:ss");
+        }
+
+        Response response = facade.addShow(show_name, city, hall, desc, show_date, last_order_date, ticket_price, time, time_operation.getValue());
+        if(response.errorOccurred())
+            System.out.println("Failed to add new show to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
+        else
+            System.out.println("The new show added to the system.\n");
     }
 
     public void orderSits()
@@ -183,6 +244,24 @@ public class ShowSystem
     public void quit()
     {
         System.out.println("Good bye :)\n");
+    }
+
+    private Pair<Boolean,Boolean> handleTimeOfShow()
+    {
+        System.out.println("The show has time? y or n");
+        boolean hasTime = true;
+        boolean botton_clicked = false;
+        LocalTime time = null;
+        if(scanner.nextLine().equals("n"))
+        {
+            hasTime = false;
+            System.out.println("Do you wan't to click on the botton \"The time is not yet set\" ? y or n");
+            if(scanner.nextLine().equals("y"))
+            {
+                botton_clicked = true;
+            }
+        }
+        return new Pair<>(hasTime, botton_clicked);
     }
 
     private int getIntegerInputFromUser(String message, String error_message)
@@ -200,5 +279,64 @@ public class ShowSystem
             }
         }
         return value;
+    }
+
+    private double getDoubleInputFromUser(String message, String error_message)
+    {
+        boolean flag = false;
+        double value = Integer.MIN_VALUE;
+        // loop until getting valid option
+        while (!flag)
+        {
+            try {
+                System.out.println(message);
+                value = Double.parseDouble(scanner.nextLine());
+                flag = true; // got valid input
+            } catch (Exception e) {
+                System.out.println(error_message);
+            }
+        }
+        return value;
+    }
+
+    private LocalTime getValidTime(String message_for_user, String error_message_for_user)
+    {
+        LocalTime time = null;
+        boolean input_time_success = false;
+
+        // loop until getting valid option
+        while (!input_time_success)
+        {
+            try {
+                System.out.println(message_for_user);
+                String input = scanner.nextLine();
+                time = LocalTime.parse(input);
+                input_time_success = true; // got valid time
+            } catch (Exception e) {
+                System.out.println(error_message_for_user);
+            }
+        }
+        return time;
+    }
+
+    private long getValidDate(String message_for_user, String error_message_for_user) {
+
+        long date = -1;
+        SimpleDateFormat date_format = new SimpleDateFormat("dd.MM.yyyy");
+        date_format.setLenient(false);
+        boolean input_date_success = false;
+
+        // loop until getting valid option
+        while (!input_date_success) {
+            try {
+                System.out.println(message_for_user);
+                String input = scanner.nextLine();
+                date = date_format.parse(input).getTime();
+                input_date_success = true; // got valid date
+            } catch (Exception e) {
+                System.out.println(error_message_for_user);
+            }
+        }
+        return date;
     }
 }
