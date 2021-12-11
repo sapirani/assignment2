@@ -1,6 +1,9 @@
 package main.data;
 
+import java.awt.*;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 public class User
@@ -10,7 +13,7 @@ public class User
     private int memberId;
     private boolean isAdmin;
     private String city;
-    private Map<Integer, OrderInfo> orders;
+    public List<OrderInfo> orders = new LinkedList<>();
 
     public User(String username, String password, String city, int memberId, boolean isAdmin)
     {
@@ -19,7 +22,6 @@ public class User
         this.memberId = memberId;
         this.city = city;
         this.isAdmin = isAdmin;
-        this.orders = new HashMap<>();
     }
 
     public String getUsername()
@@ -42,7 +44,7 @@ public class User
         return this.isAdmin;
     }
 
-    public Map<Integer,OrderInfo> getOrders()
+    public List<OrderInfo> getOrders()
     {
         return this.orders;
     }
@@ -50,5 +52,10 @@ public class User
     public String getCity()
     {
         return this.city;
+    }
+
+    public void addOrder(OrderInfo new_order)
+    {
+        this.orders.add(new_order);
     }
 }

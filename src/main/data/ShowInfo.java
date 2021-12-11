@@ -56,4 +56,89 @@ public class ShowInfo {
 		Format format = new SimpleDateFormat("dd/MM/yyyy");
 		return format.format(date);
 	}
+
+	public boolean checkIfThereAreEnoughChairs(int sit_from, int sit_to)
+	{
+		int startIndex = this.remained_regular_sits.indexOf(sit_from);
+		int endIndex = this.remained_regular_sits.indexOf(sit_to);
+
+		if((endIndex - startIndex) == (sit_to - sit_from))
+			return true;
+		return false;
+	}
+
+	public void reserveMemberChairs(int sit_from, int sit_to)
+	{
+		int startIndex = this.remained_regular_sits.indexOf(sit_from);
+		int endIndex = this.remained_regular_sits.indexOf(sit_to);
+		List<Integer> new_list_of_chairs = new LinkedList<>();
+
+		for(int i = startIndex; i <= endIndex; i++)
+		{
+			this.remained_member_sits.add(remained_regular_sits.get(i));
+		}
+
+		for(int i = 0, j = 0; i < this.remained_regular_sits.size(); i++)
+		{
+			if(i < startIndex || i > endIndex)
+				new_list_of_chairs.add(this.remained_regular_sits.get(i));
+		}
+		this.remained_regular_sits = new_list_of_chairs;
+	}
+
+	/*public boolean isAvailableChair(int chair)
+	{
+		return (this.remained_regular_sits.contains(chair) || this.remained_member_sits.contains(chair));
+	}*/
+
+	public boolean orderChairs(int[] chairs)
+	{
+		for (Integer chair: chairs)
+		{
+			if(this.remained_regular_sits.contains(chair))
+				this.remained_regular_sits.remove(chair);
+			else if(this.remained_member_sits.contains(chair))
+				this.remained_member_sits.remove(chair);
+			else
+				return false;
+		}
+		return true;
+	}
+
+	public boolean checkIfContainsMemberChairs(int[] chairs)
+	{
+		for (Integer chair: chairs)
+		{
+			 if(this.remained_member_sits.contains(chair))
+				return true;
+		}
+		return false;
+	}
+
+	public boolean addUserToInform(OrderInfo newOrder)
+	{
+		boolean flag = false;
+		OrderInfo orderExist = null;
+		for (OrderInfo order: this.userstoinform)
+		{
+			// If the same user has order to the same show
+			if(order.name.equals(newOrder.name) && order.showId == newOrder.showId)
+			{
+				flag = true;
+				orderExist = order;
+				break;
+			}
+		}
+
+		if(!flag)
+			this.userstoinform.add(newOrder);
+		else
+		{
+			// combine the two orders
+			orderExist.addChairs(newOrder.chairsIds);
+			return false;
+		}
+		return true;
+	}
+
 }

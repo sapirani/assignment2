@@ -1,6 +1,9 @@
 package main.data;
 
+import javafx.util.Pair;
+
 import java.time.LocalTime;
+import java.util.List;
 
 public class Facade
 {
@@ -91,6 +94,44 @@ public class Facade
             User current_user = this.user_controller.getLogedInUser();
             int show_id = this.show_controller.addShow(current_user, show_name, description, city, hall, show_time, hasClicked, showDate, last_date, ticket_price);
             return new Response(show_id);
+        }
+        catch (Exception e)
+        {
+            return new Response(e.getMessage());
+        }
+    }
+
+    public Response reserveMemberChairs(int show_id, int sit_from, int sit_to)
+    {
+        try
+        {
+            return new Response(this.show_controller.reservedMemberChairs(show_id, sit_from, sit_to));
+        }
+        catch (Exception e)
+        {
+            return new Response(e.getMessage());
+        }
+    }
+
+    public Response getAvailableChairsInShow(int show_id)
+    {
+        try
+        {
+            Pair<List<Integer>, List<Integer>> availableChairs = this.show_controller.getAvailableChairsInShow(show_id);
+            return new Response(availableChairs);
+        }
+        catch (Exception e)
+        {
+            return new Response(e.getMessage());
+        }
+    }
+
+    public Response addOrder(int show_id, String name, String phone_number, int[] chairs)
+    {
+        try
+        {
+            User currentUser = this.user_controller.getLogedInUser();
+            return new Response(this.show_controller.addOrder(currentUser, show_id, name, phone_number, chairs));
         }
         catch (Exception e)
         {

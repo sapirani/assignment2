@@ -10,12 +10,12 @@ import java.util.Scanner;
 
 public class ShowSystem
 {
-    private Facade facade = Facade.getInstance();
+    private final Facade facade = Facade.getInstance();
 
     private final List<String> main_menu_instructions;
     private final List<MenuHandler> main_menu_handler;
 
-    private Scanner scanner;
+    private final Scanner scanner;
 
     public ShowSystem()
     {
@@ -34,6 +34,7 @@ public class ShowSystem
         this.main_menu_instructions.add("Add city to the system");
         this.main_menu_instructions.add("Add hall to the system");
         this.main_menu_instructions.add("Add Show");
+        this.main_menu_instructions.add("Reserve Member Chairs");
         this.main_menu_instructions.add("Order sits");
         this.main_menu_instructions.add("Exit");
 
@@ -44,6 +45,7 @@ public class ShowSystem
         this.main_menu_handler.add(this::addCity);
         this.main_menu_handler.add(this::addHall);
         this.main_menu_handler.add(this::addShow);
+        this.main_menu_handler.add(this::reserveMemberChairs);
         this.main_menu_handler.add(this::orderSits);
         this.main_menu_handler.add(this::quit);
     }
@@ -125,7 +127,7 @@ public class ShowSystem
         System.out.println("Insert the city you work in: ");
         String city = scanner.nextLine();
 
-        int memberId = getIntegerInputFromUser("Enter your pais member id (if you don't have one, enter -1): ", "Member id must be integer.");
+        int memberId = getIntegerInputFromUser("Insert your Pais member id (if you don't have one, enter -1): ", "Member id must be integer.");
 
         Response response = facade.signIn(username, password, city, memberId, true);
         if(response.errorOccurred())
@@ -142,10 +144,10 @@ public class ShowSystem
         System.out.println("Insert Password: ");
         String password = scanner.nextLine();
 
-        System.out.println("Insert the city you work/live in: ");
+        System.out.println("Insert the city you work/live in: (if you don't want to, enter x)");
         String city = scanner.nextLine();
 
-        int memberId = getIntegerInputFromUser("Enter your pais member id: ", "Member id must be integer.");
+        int memberId = getIntegerInputFromUser("Insert your Pais member id: ", "Member id must be integer.");
 
         Response response = facade.signIn(username, password, city, memberId, false);
         if(response.errorOccurred())
@@ -220,7 +222,7 @@ public class ShowSystem
         String desc = scanner.nextLine();
         long show_date = getValidDate("Insert show date: ", "The show date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
         long last_order_date = getValidDate("Insert last order date: ", "The last order date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
-        double ticket_price = getDoubleInputFromUser("Instert ticket price: ", "Price must be positive number.");
+        double ticket_price = getDoubleInputFromUser("Insert ticket price: ", "Price must be positive number.");
 
         Pair<Boolean, Boolean> time_operation = handleTimeOfShow();
         LocalTime time = null;
@@ -233,12 +235,70 @@ public class ShowSystem
         if(response.errorOccurred())
             System.out.println("Failed to add new show to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
-            System.out.println("The new show added to the system.\n");
+            System.out.println("The new show added to the system. The show ID is: " + response.getValue() +"\n");
+    }
+
+    public void reserveMemberChairs()
+    {
+        int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
+        int sit_from = getIntegerInputFromUser("Insert from where to reserve the sits: ", "From index must be positive Integer.");
+        int sit_to = getIntegerInputFromUser("Insert until where to reserve the sits: ", "To index must be positive integer.");
+
+        Response response = this.facade.reserveMemberChairs(show_id, sit_from, sit_to);
+        if(response.errorOccurred())
+            System.out.println("Failed to reserve chairs in the show. \n" + response.getErrorMessage() + "\nPlease try again.\n");
+        else
+            System.out.println("Reserved the chairs successfully. \n");
     }
 
     public void orderSits()
     {
+        int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
+        Response all_available_chairs = this.facade.getAvailableChairsInShow(show_id);
+        if(all_available_chairs.errorOccurred())
+            System.out.println("Failed to get the available chairs in the show.. \n" + all_available_chairs.getErrorMessage() + "\nPlease try again.\n");
+        else
+        {
+            System.out.println("The available chairs are: ");
+            System.out.println("Regular chairs: " + ((Pair) all_available_chairs.getValue()).getKey().toString());
+            System.out.println("Pais Members chairs: " + ((Pair) all_available_chairs.getValue()).getValue().toString());
+        }
 
+        System.out.println("\nIf you'r not logged in to the system, enter your name. Else, press enter");
+        String name = scanner.nextLine();
+        System.out.println("Enter phone number: ");
+        String phone_number = scanner.nextLine();
+        System.out.println("Insert all the sits you want to order: ");
+        int[] chairs = getAllChairs();
+
+        Response response = this.facade.addOrder(show_id, name, phone_number, chairs);
+        if(response.errorOccurred())
+            System.out.println("Failed to order chairs to the show. \n" + response.getErrorMessage() + "\nPlease try again.\n");
+        else
+            System.out.println("The order of chairs added successfully. \n");
+
+    }
+
+    private int[] getAllChairs()
+    {
+        String[] chairs_as_string = scanner.nextLine().split(" ");
+        int[] chairs = new int[chairs_as_string.length];
+        for(int i = 0; i < chairs_as_string.length; i++)
+        {
+            try
+            {
+                int current = Integer.parseInt(chairs_as_string[i]);
+                if(current >= 0)
+                    chairs[i] = current;
+                else
+                    System.out.println("Chair must be positive Integer.");
+            }
+            catch (Exception e)
+            {
+                System.out.println("Chair must be positive Integer.");
+            }
+        }
+        return chairs;
     }
 
     public void quit()
@@ -251,7 +311,6 @@ public class ShowSystem
         System.out.println("The show has time? y or n");
         boolean hasTime = true;
         boolean botton_clicked = false;
-        LocalTime time = null;
         if(scanner.nextLine().equals("n"))
         {
             hasTime = false;
@@ -273,7 +332,8 @@ public class ShowSystem
             try {
                 System.out.println(message);
                 value = Integer.parseInt(scanner.nextLine());
-                flag = true; // got valid input
+                if(value >= 0 || value == -1)
+                    flag = true; // got valid input
             } catch (Exception e) {
                 System.out.println(error_message);
             }

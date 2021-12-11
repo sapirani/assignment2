@@ -1,11 +1,11 @@
 package main.data;
 
+import javafx.util.Pair;
+
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ShowController
 {
@@ -46,17 +46,16 @@ public class ShowController
 
         if(lastOrderDate > show_date)
             throw new IllegalArgumentException("The last order date must be befor the show starts.");
-        try{
-            long today = new SimpleDateFormat("dd.MM.yyyy").parse(LocalTime.now().toString()).getTime();
+        try
+        {
+            long today = System.currentTimeMillis();
             if(show_date < today)
                 throw new IllegalArgumentException("The show date must be new, after today.");
         }
         catch (Exception e)
         {
-
+            throw new IllegalArgumentException(e.getMessage());
         }
-
-
 
         int show_id = showId_counter;
         int number_of_sits = getNumberOfChairsInHall(this.city_and_hall.get(city), hall);
@@ -84,6 +83,72 @@ public class ShowController
             throw new IllegalArgumentException("This hall already exists in the system.");
 
         this.city_and_hall.get(city).add(new Hall(hall,number_of_sits));
+        return true;
+    }
+
+    public boolean reservedMemberChairs(int show_id, int sit_from, int sit_to)
+    {
+        if(!this.shows.containsKey(show_id))
+            throw new IllegalArgumentException("This show does'nt exist in the system.");
+
+        ShowInfo current_show = this.shows.get(show_id);
+        if(!current_show.remained_regular_sits.contains(sit_from) || !current_show.remained_regular_sits.contains(sit_to))
+            throw new IllegalArgumentException("The indexes aren't available.");
+
+        if(current_show.checkIfThereAreEnoughChairs(sit_from, sit_to))
+        {
+            current_show.reserveMemberChairs(sit_from,sit_to);
+        }
+
+        return true;
+    }
+
+    public Pair<List<Integer>, List<Integer>> getAvailableChairsInShow(int show_id)
+    {
+        ShowInfo currentShow = this.shows.get(show_id);
+        if(currentShow == null)
+            throw new IllegalArgumentException("This show does'nt exist in the system.");
+
+        return new Pair<List<Integer>, List<Integer>>(currentShow.remained_regular_sits, currentShow.remained_member_sits);
+    }
+
+    public boolean addOrder(User currentUser, int show_id, String name, String phone_number, int[] chairs)
+    {
+        String order_name = currentUser.getUsername();
+        if(currentUser != null && !name.equals(""))
+            throw new IllegalArgumentException("You are loged in so your name is known.");
+        else if(currentUser == null && !name.equals(""))
+            order_name = name;
+
+        ShowInfo currentShow = this.shows.get(show_id);
+        if(currentShow == null)
+            throw new IllegalArgumentException("This show does'nt exist in the system.");
+
+        try
+        {
+            long today = System.currentTimeMillis();
+            if (currentShow.lastOrderDate < today)
+                throw new IllegalArgumentException("You can't order chairs to this show. The last order day has passed.");
+        }
+        catch (Exception e)
+        {
+            throw new IllegalArgumentException(e.getMessage());
+        }
+
+        if(currentShow.checkIfContainsMemberChairs(chairs) && currentUser.getMemberId() == -1)
+            throw new IllegalArgumentException("You are not a Pais member. If you are Pais member, please login first. ");
+
+        currentShow.orderChairs(chairs);
+        OrderInfo new_order = new OrderInfo(show_id, order_name, phone_number, chairs, currentUser.getMemberId());
+
+        boolean flag = true;
+        if(!currentShow.hastime)
+        {
+           flag = currentShow.addUserToInform(new_order); // if flag = false then the user has 2 orders for the same show, we combine them.
+        }
+
+        if(flag)
+            currentUser.addOrder(new_order);
         return true;
     }
 
