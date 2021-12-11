@@ -13,7 +13,7 @@ public class User
     private int memberId;
     private boolean isAdmin;
     private String city;
-    public List<OrderInfo> orders = new LinkedList<>();
+    public Map<Integer,OrderInfo> orders = new HashMap<>();
 
     public User(String username, String password, String city, int memberId, boolean isAdmin)
     {
@@ -44,7 +44,7 @@ public class User
         return this.isAdmin;
     }
 
-    public List<OrderInfo> getOrders()
+    public Map<Integer,OrderInfo> getOrders()
     {
         return this.orders;
     }
@@ -54,8 +54,8 @@ public class User
         return this.city;
     }
 
-    public void addOrder(OrderInfo new_order)
+    public void addOrder(int order_id, OrderInfo new_order)
     {
-        this.orders.add(new_order);
+        this.orders.put(order_id, new_order);
     }
 }

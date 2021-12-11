@@ -12,6 +12,7 @@ public class ShowController
     private Map<Integer, ShowInfo> shows;
     private Map<String, List<Hall>> city_and_hall;
     private int showId_counter;
+    private int orderId_counter;
 
     /**
      * Implementation of singleton
@@ -31,6 +32,7 @@ public class ShowController
         this.shows = new HashMap<>();
         this.city_and_hall = new HashMap<>();
         this.showId_counter = 1;
+        this.orderId_counter = 1;
     }
 
     public int addShow(User user,String show_name, String description, String city, String hall, LocalTime time, boolean clicked_no_time,long show_date, long lastOrderDate, double price)
@@ -112,7 +114,7 @@ public class ShowController
         return new Pair<List<Integer>, List<Integer>>(currentShow.remained_regular_sits, currentShow.remained_member_sits);
     }
 
-    public boolean addOrder(User currentUser, int show_id, String name, String phone_number, int[] chairs)
+    public int addOrder(User currentUser, int show_id, String name, String phone_number, int[] chairs)
     {
         String order_name = currentUser.getUsername();
         if(currentUser != null && !name.equals(""))
@@ -140,7 +142,7 @@ public class ShowController
 
         currentShow.orderChairs(chairs);
         OrderInfo new_order = new OrderInfo(show_id, order_name, phone_number, chairs, currentUser.getMemberId());
-
+        int order_id = orderId_counter;
         boolean flag = true;
         if(!currentShow.hastime)
         {
@@ -148,8 +150,9 @@ public class ShowController
         }
 
         if(flag)
-            currentUser.addOrder(new_order);
-        return true;
+            currentUser.addOrder(order_id, new_order);
+        orderId_counter++;
+        return order_id;
     }
 
     private int getNumberOfChairsInHall(List<Hall> halls, String hall)

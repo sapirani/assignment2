@@ -275,7 +275,7 @@ public class ShowSystem
         if(response.errorOccurred())
             System.out.println("Failed to order chairs to the show. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
-            System.out.println("The order of chairs added successfully. \n");
+            System.out.println("The order of chairs added successfully. The chairs are saved for you for one hour. Please call and pay. \n");
 
     }
 
