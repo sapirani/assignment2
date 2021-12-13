@@ -56,16 +56,9 @@ public class ShowController
         if(lastOrderDate > show_date)
             throw new IllegalArgumentException("The last order date must be befor the show starts.");
 
-        try
-        {
-            long today = System.currentTimeMillis();
-            if(show_date < today)
-                throw new IllegalArgumentException("The show date must be new, after today.");
-        }
-        catch (Exception e)
-        {
-            throw new IllegalArgumentException(e.getMessage());
-        }
+        long today = System.currentTimeMillis();
+        if(show_date < today)
+            throw new IllegalArgumentException("The show date must be new, after today.");
 
         int number_of_sits = getNumberOfChairsInHall(this.city_and_hall.get(city), hall);
         show.initializeChairs(number_of_sits); // Initialize number of available sits in the show's hall
@@ -98,15 +91,11 @@ public class ShowController
     public boolean reservedMemberChairs(int show_id, int sit_from, int sit_to)
     {
         if(!this.shows.containsKey(show_id))
-            throw new IllegalArgumentException("This show does'nt exist in the system.");
+            throw new IllegalArgumentException("This show doesn't exist in the system.");
 
         ShowInfo current_show = this.shows.get(show_id);
-        // check if the requested sits (from, to) are available
-        if(!current_show.remained_regular_sits.contains(sit_from) || !current_show.remained_regular_sits.contains(sit_to))
-            throw new IllegalArgumentException("The indexes aren't available.");
-
         // check if there are enough available sits between from and to
-        if(current_show.checkIfThereAreEnoughChairs(sit_from, sit_to))
+        if(current_show.checkIfThereAreEnoughRegularChairs(sit_from, sit_to))
         {
             current_show.reserveMemberChairs(sit_from,sit_to);
         }
@@ -128,20 +117,20 @@ public class ShowController
     public int addOrder(User currentUser, OrderInfo order)
     {
         int show_id = order.showId;
-        int memberId = order.memberId;
-        String name = order.name;
         String phone_number = order.phone;
         int[] chairs = order.chairsIds;
 
+        order.name = checkValidName(order.name, (currentUser == null? "" : currentUser.getUsername()));
+        order.memberId = checkValidMemberNumber(order.memberId, (currentUser == null? 0 : currentUser.getMemberId()));
         /* input validation */
-        if(name == null || phone_number == null || phone_number == "" || chairs == null || chairs.length == 0)
+        if(/*name == null || */phone_number == null || phone_number == "" || chairs == null || chairs.length == 0)
             throw new IllegalArgumentException("Order must include name,phone number and chairs!");
 
-        if(currentUser != null && !name.equals(""))
-            throw new IllegalArgumentException("You are logged in so your name is known.");
-        else if(currentUser != null)
+        /*if(currentUser != null && !name.equals(""))
+            throw new IllegalArgumentException("You are logged in so your name is known.");*/
+        /*else if(currentUser != null)
         {
-            if(name.equals(""))
+           if(name.equals(""))
             {
                 name = currentUser.getUsername();
                 order.name = name;
@@ -150,28 +139,25 @@ public class ShowController
             order.memberId = memberId;
         }
         else if(memberId != -1 && memberId <= 0)
-            throw new IllegalArgumentException("The given number does'nt match Pais member.");
+            throw new IllegalArgumentException("The given number does'nt match Pais member.");*/
 
         ShowInfo currentShow = this.shows.get(show_id);
         if(currentShow == null)
             throw new IllegalArgumentException("This show does'nt exist in the system.");
 
-        try
-        {
-            long today = System.currentTimeMillis();
-            if (currentShow.lastOrderDate < today)
-                throw new IllegalArgumentException("You can't order chairs to this show. The last order day has passed.");
-        }
-        catch (Exception e)
-        {
-            throw new IllegalArgumentException(e.getMessage());
-        }
+        long today = System.currentTimeMillis();
+        if (currentShow.lastOrderDate < today)
+            throw new IllegalArgumentException("You can't order chairs to this show. The last order day has passed.");
 
         // if you tried to order reserve chairs but you are not pais member
-        if(currentShow.checkIfContainsMemberChairs(chairs) && memberId < 0)
+        if(currentShow.checkIfContainsMemberChairs(chairs) && order.memberId <= 0)
             throw new IllegalArgumentException("You are not a Pais member. If you are Pais member, please login first. ");
 
-        currentShow.orderChairs(chairs);
+        if(currentShow.checkIfAllChairsAreAvailable(chairs))
+            currentShow.orderChairs(chairs);
+        else
+            throw new IllegalArgumentException("Not all the chairs are available.");
+
         int order_id = orderId_counter;
         boolean flag = true;
         if(!currentShow.hastime)
@@ -185,13 +171,35 @@ public class ShowController
         return order_id;
     }
 
+    private int checkValidMemberNumber(int input_member_id, int logged_in_member_id)
+    {
+        if(logged_in_member_id == 0 && input_member_id <= 0 && input_member_id != -1)
+            throw new IllegalArgumentException("Invalid member number. Member number must be positive.");
+        else if(logged_in_member_id != 0 && input_member_id != -1)
+            throw new IllegalArgumentException("You are logged in already. You can't enter another pais member number.");
+        else if(logged_in_member_id == 0)
+            return input_member_id;
+        else return logged_in_member_id;
+    }
+
+    private String checkValidName(String input_name, String logged_in_name)
+    {
+        if(logged_in_name.equals("") && (input_name == null || input_name.equals("")))
+            throw new IllegalArgumentException("You must insert name to the order or login to your user (if you have one).");
+        else if(!logged_in_name.equals("") && !input_name.equals(""))
+            throw new IllegalArgumentException("You are logged in already. You can't enter another name.");
+        else if(!logged_in_name.equals(""))
+            return logged_in_name;
+        else return input_name;
+    }
+
     public List<OrderInfo> getWaitings(int show_id)
     {
         ShowInfo currentShow = this.shows.get(show_id);
         if(currentShow == null)
             throw new IllegalArgumentException("This show does'nt exist in the system.");
 
-        return currentShow.userstoinform; // TODO: what need to return?
+        return currentShow.userstoinform;
     }
 
     /*

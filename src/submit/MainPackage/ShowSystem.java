@@ -141,7 +141,7 @@ public class ShowSystem
 
         int memberId = getIntegerInputFromUser("Insert your Pais member id (if you don't have one, enter -1): ", "Member id must be integer.");
 
-        Response response = facade.signUp(username, password, city, memberId, true);
+        Response<Boolean> response = facade.signUp(username, password, city, memberId, true);
         if(response.errorOccurred())
             System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -159,12 +159,9 @@ public class ShowSystem
         System.out.println("Insert Password: ");
         String password = scanner.nextLine();
 
-        System.out.println("Insert the city you work/live in: (if you don't want to, enter x)");
-        String city = scanner.nextLine();
-
         int memberId = getIntegerInputFromUser("Insert your Pais member id: ", "Member id must be integer.");
 
-        Response response = facade.signUp(username, password, city, memberId, false);
+        Response<Boolean> response = facade.signUp(username, password, "x", memberId, false);
         if(response.errorOccurred())
             System.out.println("Sign up failed. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -182,7 +179,7 @@ public class ShowSystem
         System.out.println("Insert Password: ");
         String password = scanner.nextLine();
 
-        Response response = facade.login(username, password);
+        Response<Boolean> response = facade.login(username, password);
         if(response.errorOccurred())
             System.out.println("Login failed. \n" + response.getErrorMessage() + "\n");
         else
@@ -194,7 +191,7 @@ public class ShowSystem
      */
     public void logout()
     {
-        Response response = facade.logout();
+        Response<Boolean> response = facade.logout();
         if(response.errorOccurred())
             System.out.println("Logout failed. \n" + response.getErrorMessage());
         else
@@ -209,7 +206,7 @@ public class ShowSystem
         System.out.println("Insert City name: ");
         String city = scanner.nextLine();
 
-        Response response = this.facade.addCity(city);
+        Response<Boolean> response = this.facade.addCity(city);
         if(response.errorOccurred())
             System.out.println("Failed to add new city to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -230,7 +227,7 @@ public class ShowSystem
 
         int number_of_sits = getIntegerInputFromUser("Insert number of available sits in the hall: ", "Number of int must be integer.");
 
-        Response response = this.facade.addHall(city, hall, number_of_sits);
+        Response<Boolean> response = this.facade.addHall(city, hall, number_of_sits);
         if(response.errorOccurred())
             System.out.println("Failed to add new hall to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -252,8 +249,8 @@ public class ShowSystem
         String hall = scanner.nextLine();
         System.out.println("Insert description: ");
         String desc = scanner.nextLine();
-        long show_date = getValidDate("Insert show date: ", "The show date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
-        long last_order_date = getValidDate("Insert last order date: ", "The last order date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
+        long show_date = getValidDate("Insert show date: (dd.mm.yyyy)", "The show date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
+        long last_order_date = getValidDate("Insert last order date: (dd.mm.yyyy)", "The last order date must be from the format dd.mm.yyyy"); //  scanner.nextLong();
         double ticket_price = getDoubleInputFromUser("Insert ticket price: ", "Price must be positive number.");
 
         Pair<Boolean, Boolean> time_operation = handleTimeOfShow();
@@ -264,7 +261,7 @@ public class ShowSystem
         }
 
         ShowInfo show = new ShowInfo(show_name, city, hall,  desc, time, show_date, last_order_date, ticket_price);
-        Response response = facade.addShow(show, time_operation.getValue());
+        Response<Integer> response = facade.addShow(show, time_operation.getValue());
         if(response.errorOccurred())
             System.out.println("Failed to add new show to the system. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -280,7 +277,7 @@ public class ShowSystem
         int sit_from = getIntegerInputFromUser("Insert from where to reserve the sits: ", "From index must be positive Integer.");
         int sit_to = getIntegerInputFromUser("Insert until where to reserve the sits: ", "To index must be positive integer.");
 
-        Response response = this.facade.reserveMemberChairs(show_id, sit_from, sit_to);
+        Response<Boolean> response = this.facade.reserveMemberChairs(show_id, sit_from, sit_to);
         if(response.errorOccurred())
             System.out.println("Failed to reserve chairs in the show. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -293,8 +290,10 @@ public class ShowSystem
      */
     public void orderSits()
     {
+        Response<Boolean> is_logged_in = this.facade.getIsLoggedIn();
+
         int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
-        Response all_available_chairs = this.facade.getAvailableChairsInShow(show_id);
+        Response<Pair<List<Integer>,List<Integer>>> all_available_chairs = this.facade.getAvailableChairsInShow(show_id);
         if(all_available_chairs.errorOccurred())
         {
             System.out.println("Failed to get the available chairs in the show. \n" + all_available_chairs.getErrorMessage() + "\nPlease try again.\n");
@@ -303,20 +302,26 @@ public class ShowSystem
         else
         {
             System.out.println("The available chairs are: ");
-            System.out.println("Regular chairs: " + ((Pair) all_available_chairs.getValue()).getKey().toString());
-            System.out.println("Pais Members chairs: " + ((Pair) all_available_chairs.getValue()).getValue().toString());
+            System.out.println("Regular chairs: " + (all_available_chairs.getValue()).getKey().toString());
+            System.out.println("Pais Members chairs: " + (all_available_chairs.getValue()).getValue().toString());
         }
 
-        System.out.println("\nIf you'r not logged in to the system, enter your name. Else, press enter");
-        String name = scanner.nextLine();
+        String name = "";
+        if(!is_logged_in.getValue())
+        {
+            System.out.println("\nInsert your name: ");
+            name = scanner.nextLine();
+        }
         System.out.println("Enter phone number: ");
         String phone_number = scanner.nextLine();
         System.out.println("Insert all the sits you want to order: ");
         int[] chairs = getAllChairs();
-        int memberId = getIntegerInputFromUser("Insert Pais member id (if you logged in already/don't have one, enter -1): ", "Member id must be positive integer.");
+        int memberId = -1;
+        if(is_logged_in.getValue())
+            memberId = getIntegerInputFromUser("Insert Pais member id (if you don't have one, enter -1): ", "Member id must be positive integer.");
 
         OrderInfo order = new OrderInfo(show_id, name, phone_number, chairs, memberId);
-        Response response = this.facade.addOrder(order);
+        Response<Integer> response = this.facade.addOrder(order);
         if(response.errorOccurred())
             System.out.println("Failed to order chairs to the show. \n" + response.getErrorMessage() + "\nPlease try again.\n");
         else
@@ -355,11 +360,11 @@ public class ShowSystem
     public void checkShowWaitings()
     {
         int show_id = getIntegerInputFromUser("Insert show id: ", "Show id must be positive Integer.");
-        Response waiting_order = this.facade.getWaitings(show_id);
+        Response<List<OrderInfo>> waiting_order = this.facade.getWaitings(show_id);
         if(waiting_order.errorOccurred())
             System.out.println("Failed to get the waiting orders for the show. \n" + waiting_order.getErrorMessage() + "\nPlease try again.\n");
         else
-            System.out.println("The waiting orders names: " + printWaitingOrders((List<OrderInfo>)waiting_order.getValue()));
+            System.out.println("The waiting orders names: " + printWaitingOrders(waiting_order.getValue()));
     }
 
     /*
@@ -396,7 +401,7 @@ public class ShowSystem
         if(scanner.nextLine().equals("n"))
         {
             hasTime = false;
-            System.out.println("Do you wan't to click on the botton \"The time is not yet set\" ? y or n");
+            System.out.println("Click on the button \"The time is not yet set\" ? y or n");
             if(scanner.nextLine().equals("y"))
             {
                 botton_clicked = true;
@@ -405,7 +410,7 @@ public class ShowSystem
         return new Pair<>(hasTime, botton_clicked);
     }
 
-    /* Helpful functions that chack validation of inputs */
+    /* Helpful functions that check validation of inputs */
 
     private int getIntegerInputFromUser(String message, String error_message)
     {

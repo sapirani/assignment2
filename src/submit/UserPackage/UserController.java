@@ -30,7 +30,7 @@ public class UserController
     public boolean signUp(String new_username, String password, String city, int memberId, boolean isAdmin)
     {
         if(checkIfUsernameExists(new_username))
-            throw new IllegalArgumentException("Username already taken. Pleas try again.\n");
+            throw new IllegalArgumentException("Username already taken. Please try again.\n");
 
         User new_user = new User(new_username, password, city,memberId, isAdmin);
         this.users.put(new_username, new_user);

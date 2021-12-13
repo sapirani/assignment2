@@ -34,10 +34,10 @@ public class RealBridge implements Bridge
         boolean has_clicked = showInfo.hastime ? false : true; // If the show doesn't have time, you must click the matching bottom.
         this.facade.login(user, pass); // You must login as admin user
 
-        Response r = this.facade.addShow(showInfo, has_clicked);
+        Response<Integer> r = this.facade.addShow(showInfo, has_clicked);
         this.facade.logout();
         if(!r.errorOccurred())
-            return (int) r.getValue();
+            return r.getValue();
 
         return -1;
     }
@@ -51,9 +51,9 @@ public class RealBridge implements Bridge
     @Override
     public int newOrder(OrderInfo order)
     {
-        Response r = this.facade.addOrder(order);
+        Response<Integer> r = this.facade.addOrder(order);
         if(!r.errorOccurred())
-            return (int) r.getValue();
+            return r.getValue();
 
         return -1;
     }
@@ -61,9 +61,9 @@ public class RealBridge implements Bridge
     @Override
     public List<OrderInfo> getWaitings(int id)
     {
-        Response r = this.facade.getWaitings(id);
+        Response<List<OrderInfo>> r = this.facade.getWaitings(id);
         if(!r.errorOccurred())
-            return (List<OrderInfo>) r.getValue();
+            return r.getValue();
 
         return null;
     }

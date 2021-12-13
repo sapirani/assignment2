@@ -27,7 +27,7 @@ public class Facade
         return Facade.FacadeHolder.INSTANCE;
     }
 
-    public Response signUp(String new_username, String password, String city, int memberId, boolean isAdmin)
+    public Response<Boolean> signUp(String new_username, String password, String city, int memberId, boolean isAdmin)
     {
         try
         {
@@ -40,7 +40,7 @@ public class Facade
         }
     }
 
-    public Response login(String new_username, String password)
+    public Response<Boolean> login(String new_username, String password)
     {
         try
         {
@@ -53,7 +53,7 @@ public class Facade
         }
     }
 
-    public Response logout()
+    public Response<Boolean> logout()
     {
         try
         {
@@ -66,7 +66,7 @@ public class Facade
         }
     }
 
-    public Response addCity(String city)
+    public Response<Boolean> addCity(String city)
     {
         try
         {
@@ -78,7 +78,7 @@ public class Facade
         }
     }
 
-    public Response addHall(String city, String hall, int number_of_sits)
+    public Response<Boolean> addHall(String city, String hall, int number_of_sits)
     {
         try
         {
@@ -90,7 +90,7 @@ public class Facade
         }
     }
 
-    public Response addShow(ShowInfo show, boolean hasClicked)
+    public Response<Integer> addShow(ShowInfo show, boolean hasClicked)
     {
         try
         {
@@ -104,7 +104,7 @@ public class Facade
         }
     }
 
-    public Response reserveMemberChairs(int show_id, int sit_from, int sit_to)
+    public Response<Boolean> reserveMemberChairs(int show_id, int sit_from, int sit_to)
     {
         try
         {
@@ -116,7 +116,7 @@ public class Facade
         }
     }
 
-    public Response getAvailableChairsInShow(int show_id)
+    public Response<Pair<List<Integer>, List<Integer>>> getAvailableChairsInShow(int show_id)
     {
         try
         {
@@ -129,7 +129,7 @@ public class Facade
         }
     }
 
-    public Response addOrder(OrderInfo order)
+    public Response<Integer> addOrder(OrderInfo order)
     {
         try
         {
@@ -142,7 +142,7 @@ public class Facade
         }
     }
 
-    public Response getWaitings(int show_id)
+    public Response<List<OrderInfo>> getWaitings(int show_id)
     {
         try
         {
@@ -153,4 +153,17 @@ public class Facade
             return new Response(e.getMessage());
         }
     }
+
+    public Response<Boolean> getIsLoggedIn()
+    {
+        try
+        {
+            return new Response((this.user_controller.getLogedInUser() != null));
+        }
+        catch (Exception e)
+        {
+            return new Response(e.getMessage());
+        }
+    }
+
 }

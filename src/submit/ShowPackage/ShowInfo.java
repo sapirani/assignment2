@@ -3,9 +3,9 @@ package submit.ShowPackage;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.time.LocalTime;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ShowInfo {
 	public String city;
@@ -57,7 +57,7 @@ public class ShowInfo {
 	/*
 	 * Check if there are enough free chairs.
 	 */
-	public boolean checkIfThereAreEnoughChairs(int sit_from, int sit_to)
+	public boolean checkIfThereAreEnoughRegularChairs(int sit_from, int sit_to)
 	{
 		for (int i = sit_from; i <= sit_to; i++)
 		{
@@ -69,23 +69,11 @@ public class ShowInfo {
 
 	public void reserveMemberChairs(int sit_from, int sit_to)
 	{
-		int startIndex = this.remained_regular_sits.indexOf(sit_from);
-		int endIndex = this.remained_regular_sits.indexOf(sit_to);
-		List<Integer> new_list_of_chairs = new LinkedList<>();
-
-		// add the sits to the members sits
-		for(int i = startIndex; i <= endIndex; i++)
+		for(int i = sit_from; i <= sit_to; i++)
 		{
-			this.remained_member_sits.add(remained_regular_sits.get(i));
+			this.remained_member_sits.add(i);
+			this.remained_regular_sits.remove(Integer.valueOf(i));
 		}
-
-		// update the number of regular chairs
-		for(int i = 0, j = 0; i < this.remained_regular_sits.size(); i++)
-		{
-			if(i < startIndex || i > endIndex)
-				new_list_of_chairs.add(this.remained_regular_sits.get(i));
-		}
-		this.remained_regular_sits = new_list_of_chairs;
 	}
 
 	/*
@@ -154,5 +142,15 @@ public class ShowInfo {
 	{
 		for(int i = 0; i < number_of_sits; i++)
 			this.remained_regular_sits.add(i+1);
+	}
+
+	public boolean checkIfAllChairsAreAvailable(int[] chairs)
+	{
+		List<Integer> requested_chairs = Arrays.stream(chairs).boxed().collect(Collectors.toList());
+		List<Integer> all_sits = new ArrayList<>(this.remained_regular_sits);
+		all_sits.addAll(this.remained_member_sits);
+		if(all_sits.containsAll(requested_chairs))
+			return true;
+		return false;
 	}
 }
